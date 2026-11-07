@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="حديقة الحروف">
+<title>حديقة الحروف</title>
+<style>
+:root{--sky:#bfe6f5;--leaf:#2f8f57;--leaf2:#256f45;--sun:#ff8a3d;--brown:#4a2f1b;--sand:#fff1c9;--red:#e5484d;
+font-family:"Geeza Pro","Baghdad","Arial",sans-serif}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+html,body{margin:0;height:100%;background:var(--sky);color:var(--brown);overflow:hidden}
+#app{height:100%;display:flex;flex-direction:column;padding:env(safe-area-inset-top) 18px env(safe-area-inset-bottom);
+background:linear-gradient(var(--sky) 70%,#9fd68a 70%)}
+header{display:flex;align-items:center;justify-content:space-between;padding:12px 4px;font-size:26px;font-weight:700}
+header button{font-size:30px;background:#fff;border:0;border-radius:50%;width:56px;height:56px}
+#view{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:0}
+.btn{font:inherit;font-size:28px;font-weight:700;color:#fff;background:var(--leaf);border:0;border-bottom:6px solid var(--leaf2);
+border-radius:22px;padding:14px 34px;margin:8px}
+.btn:active{transform:translateY(4px);border-bottom-width:2px}
+.btn:disabled{opacity:.4}
+.btn.go{background:var(--sun);border-bottom-color:#d96a1f}
+.hero{text-align:center}
+.hero h1{font-size:68px;margin:0 0 6px}
+.hero p{font-size:28px;margin:0 0 20px}
+.hero .zoo{font-size:60px;letter-spacing:10px}
+.grid{display:grid;grid-template-columns:repeat(7,1fr);gap:12px;width:100%;max-width:900px;direction:rtl}
+.cell{font:inherit;font-size:46px;font-weight:700;background:#fff;color:var(--brown);border:0;border-bottom:6px solid #d8cfa8;
+border-radius:20px;aspect-ratio:1;position:relative;padding:0}
+.cell small{position:absolute;bottom:2px;left:0;right:0;font-size:18px}
+.cell.ok{background:var(--sand);border-bottom-color:var(--sun)}
+.cell.lock{opacity:.45}
+.steps{display:flex;gap:10px;margin-bottom:10px}
+.steps span{padding:6px 14px;border-radius:30px;background:#ffffffaa;font-size:20px}
+.steps span.on{background:var(--sun);color:#fff;font-weight:700}
+.steps span.fin{background:var(--leaf);color:#fff}
+.card{background:#fff;border-radius:30px;padding:18px 30px;text-align:center;box-shadow:0 8px 0 #0002;max-width:760px;width:100%}
+.big{font-size:150px;line-height:1.1;color:var(--leaf)}
+.em{font-size:90px}.wd{font-size:40px;font-weight:700;margin-bottom:6px}
+.opts{display:flex;gap:16px;justify-content:center;margin:14px 0}
+.opt{font:inherit;font-size:84px;font-weight:700;background:var(--sand);color:var(--brown);border:0;border-bottom:8px solid #e3c878;
+border-radius:26px;width:190px;height:160px}
+.opt.bad{animation:sh .4s;background:#ffd6d6}
+.opt.good{background:#c8f0cf;border-bottom-color:var(--leaf)}
+@keyframes sh{25%{transform:translateX(-14px)}75%{transform:translateX(14px)}}
+.q{font-size:30px;margin:0 0 4px}
+.cv{position:relative;width:min(520px,100%);aspect-ratio:520/380;background:#fff;border-radius:26px;margin:0 auto;box-shadow:0 6px 0 #0002;overflow:hidden}
+.cv canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none}
+.msg{min-height:34px;font-size:24px;font-weight:700;color:var(--red)}
+#cheer{position:fixed;inset:0;display:none;align-items:center;justify-content:center;flex-direction:column;background:#fff9;font-size:90px;z-index:9;text-align:center}
+#cheer b{font-size:56px;color:var(--leaf)}
+@media (max-width:700px){.opt{width:100px;height:110px;font-size:52px}.big{font-size:100px}.hero h1{font-size:44px}.cell{font-size:30px}}
+</style>
+</head>
+<body>
+<div id="app">
+  <header><button id="home" aria-label="الرئيسية">🏠</button><span id="ttl">حديقة الحروف</span><span id="stars">⭐ 0</span></header>
+  <div id="view"></div>
+</div>
+<div id="cheer"></div>
+<script>
+const LET="أبتثجحخدذرزسشصضطظعغفقكلمنهوي";
+const NAMES=["ألف","باء","تاء","ثاء","جيم","حاء","خاء","دال","ذال","راء","زاي","سين","شين","صاد","ضاد","طاء","ظاء","عين","غين","فاء","قاف","كاف","لام","ميم","نون","هاء","واو","ياء"];
+const ANIMALS=[["أسد","🦁"],["بطة","🦆"],["تمساح","🐊"],["ثعلب","🦊"],["جمل","🐪"],["حصان","🐴"],["خفاش","🦇"],["دب","🐻"],["ذئب","🐺"],["روبيان","🦐"],["زرافة","🦒"],["سلحفاة","🐢"],["شمبانزي","🐒"],["صقر","🦅"],["ضفدع","🐸"],["طاووس","🦚"],["ظبي","🦌"],["عصفور","🐦"],["غراب","🐦‍⬛"],["فيل","🐘"],["قطة","🐱"],["كلب","🐕"],["لاما","🦙"],["ماعز","🐐"],["نمر","🐅"],["هامستر","🐹"],["وزة","🦢"],["يمامة","🕊️"]];
+const L=[...LET].map((c,i)=>({c,n:NAMES[i],w:ANIMALS[i][0],e:ANIMALS[i][1]}));
+const KEY="hadiqat-huroof";
+let done=[];try{done=JSON.parse(localStorage.getItem(KEY))||[]}catch(e){}
+while(done.length<28)done.push(false);
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(done))}catch(e){}};
+const $=s=>document.querySelector(s), view=$("#view");
+const cur=()=>{const i=done.indexOf(false);return i<0?28:i};
+const upd=()=>{$("#stars").textContent="⭐ "+done.filter(Boolean).length};
+
+/* الصوت: ضع ملفات mp3 في مجلد audio (مثل audio/n0.mp3 للحرف الأول) وتُستخدم تلقائيا، وإلا يُستخدم صوت المتصفح */
+function say(t){try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang="ar-SA";u.rate=.7;speechSynthesis.speak(u)}catch(e){}}
+function play(key,t){let f=false;const fb=()=>{if(!f){f=true;say(t)}};
+const tryf=(exts)=>{if(!exts.length)return fb();const a=new Audio("audio/"+key+"."+exts[0]);a.onerror=()=>tryf(exts.slice(1));a.play().catch(()=>tryf(exts.slice(1)))};
+tryf(["mp3","wav","m4a"])}
+const shuffle=a=>a.map(x=>[Math.random(),x]).sort((p,q)=>p[0]-q[0]).map(p=>p[1]);
+
+function cheer(msg,cb,ms=1400){const c=$("#cheer");c.innerHTML=`<div>🎉</div><b>${msg}</b>`;c.style.display="flex";setTimeout(()=>{c.style.display="none";cb&&cb()},ms)}
+
+function start(){
+  $("#ttl").textContent="حديقة الحروف";
+  view.innerHTML=`<div class="hero"><div class="zoo">🦁🐘🦒</div><h1>حديقة الحروف</h1><p>افتح أقفاص الحيوانات مع كل حرف!</p><button class="btn go" id="go">ابدأ اللعب</button></div>`;
+  $("#go").onclick=()=>{say(" ");map()};
+}
+function map(){
+  upd();$("#ttl").textContent="اختر حرفك";const c=cur();
+  view.innerHTML=`<div class="grid">${L.map((l,i)=>`<button class="cell ${done[i]?"ok":""} ${i>c?"lock":""}" data-i="${i}">${l.c}<small>${done[i]?"⭐":i>c?"🔒":""}</small></button>`).join("")}</div>`;
+  view.querySelectorAll(".cell").forEach(b=>b.onclick=()=>{const i=+b.dataset.i;if(i<=c)station(i,0);else say("خَلِّص الحرف اللي قبله")});
+}
+const TITLES=["النطق","الحركات","المد","الكتابة"];
+const steps=k=>`<div class="steps">${TITLES.map((t,j)=>`<span class="${j<k?"fin":j==k?"on":""}">${t}</span>`).join("")}</div>`;
+function next(i,k){if(k<3)station(i,k+1);else{done[i]=true;save();upd();cheer(`أحسنت! فتحت قفص ${L[i].w} ${L[i].e}`,map,2200);say("أحسنت")}}
+
+function station(i,k){
+  const l=L[i];$("#ttl").textContent="حرف "+l.n;
+  if(k==0){
+    view.innerHTML=steps(0)+`<div class="card"><div class="big">${l.c}</div><div class="em">${l.e}</div><div class="wd">${l.w}</div>
+    <button class="btn" id="snd">🔊 اسمع</button><button class="btn go" id="nx" disabled>التالي ◀</button></div>`;
+    const p=()=>{play("n"+i,l.n);setTimeout(()=>play("w"+i,l.w),1100);$("#nx").disabled=false};
+    $("#snd").onclick=p;$("#nx").onclick=()=>next(i,0);setTimeout(p,400);
+  }else if(k==1){
+    quiz(i,k,[l.c+"\u064E",l.c+"\u064F",l.c+"\u0650"],"أي صوت سمعت؟");
+  }else if(k==2){
+    quiz(i,k,[l.c+"\u064E\u0627",l.c+"\u064F\u0648",l.c+"\u0650\u064A"],"أي صوت سمعت؟");
+  }else write(i);
+}
+function quiz(i,k,vars,q){
+  let rounds=shuffle(vars),r=0;
+  const round=()=>{
+    const t=rounds[r];
+    view.innerHTML=steps(k)+`<div class="card"><p class="q">${q} (${r+1}/3)</p><button class="btn" id="snd">🔊 اسمع</button>
+    <div class="opts">${shuffle(vars).map(v=>`<button class="opt" data-v="${v}">${v}</button>`).join("")}</div></div>`;
+    const key=(k==1?"h":"m")+i+"_"+vars.indexOf(t);
+    $("#snd").onclick=()=>play(key,t);setTimeout(()=>play(key,t),400);
+    view.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{
+      if(b.dataset.v===t){b.classList.add("good");say("أحسنت");setTimeout(()=>{r++;r<3?round():next(i,k)},800)}
+      else{b.classList.add("bad");setTimeout(()=>b.classList.remove("bad"),450);play(key,t)}
+    });
+  };round();
+}
+function write(i){
+  const l=L[i],W=520,H=380;
+  view.innerHTML=steps(3)+`<div class="card"><p class="q">امش بإصبعك على الحرف</p><div class="cv"><canvas id="g" width="${W}" height="${H}"></canvas><canvas id="d" width="${W}" height="${H}"></canvas></div>
+  <div class="msg" id="msg"></div><button class="btn" id="clr">🧽 مسح</button><button class="btn go" id="ok">تم ✔</button></div>`;
+  const g=$("#g").getContext("2d");g.font='bold 300px "Geeza Pro","Arial",sans-serif';g.textAlign="center";g.textBaseline="middle";
+  g.fillStyle="#d9d3c7";g.fillText(l.c,W/2,H/2+10);
+  const mask=g.getImageData(0,0,W,H).data;
+  const cv=$("#d"),d=cv.getContext("2d");d.lineWidth=36;d.lineCap=d.lineJoin="round";d.strokeStyle="#ff8a3d";
+  let on=false;
+  const pt=e=>{const r=cv.getBoundingClientRect();return[(e.clientX-r.left)*W/r.width,(e.clientY-r.top)*H/r.height]};
+  cv.onpointerdown=e=>{on=true;cv.setPointerCapture(e.pointerId);const[x,y]=pt(e);d.beginPath();d.moveTo(x,y);d.lineTo(x+.1,y);d.stroke()};
+  cv.onpointermove=e=>{if(!on)return;const[x,y]=pt(e);d.lineTo(x,y);d.stroke();d.beginPath();d.moveTo(x,y)};
+  cv.onpointerup=cv.onpointercancel=()=>{on=false};
+  $("#clr").onclick=()=>{d.clearRect(0,0,W,H);$("#msg").textContent=""};
+  $("#ok").onclick=()=>{
+    const u=d.getImageData(0,0,W,H).data;let t=0,c=0;
+    for(let p=3;p<mask.length;p+=4)if(mask[p]>60){t++;if(u[p]>60)c++}
+    if(c/t>=.4){say("أحسنت");next(i,3)}else{$("#msg").textContent="غطِّ الحرف كله بإصبعك، جرّب مرة ثانية";say("جرّب مرة ثانية")}
+  };
+}
+$("#home").onclick=()=>{$("#cheer").style.display="none";map()};
+start();
+</script>
+</body>
+</html>
