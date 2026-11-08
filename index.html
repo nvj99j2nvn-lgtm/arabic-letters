@@ -74,9 +74,20 @@ const upd=()=>{$("#stars").textContent="⭐ "+done.filter(Boolean).length};
 
 /* الصوت: ضع ملفات mp3 في مجلد audio (مثل audio/n0.mp3 للحرف الأول) وتُستخدم تلقائيا، وإلا يُستخدم صوت المتصفح */
 function say(t){try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang="ar-SA";u.rate=.7;speechSynthesis.speak(u)}catch(e){}}
-function play(key,t){let f=false;const fb=()=>{if(!f){f=true;say(t)}};
-const tryf=(exts)=>{if(!exts.length)return fb();const a=new Audio("audio/"+key+"."+exts[0]);a.onerror=()=>tryf(exts.slice(1));a.play().catch(()=>tryf(exts.slice(1)))};
-tryf(["mp3","wav","m4a"])}
+const A=new Audio();let PT=0;
+function unlock(){try{A.src="data:audio/wav;base64,UklGRuwAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YcgAAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgA==";A.play().catch(()=>{})}catch(e){}}
+function play(key,t,after){
+  const tok=++PT,exts=["mp3","wav","m4a"];let fb=false;
+  try{speechSynthesis.cancel()}catch(e){}
+  const fallback=()=>{if(fb||tok!==PT)return;fb=true;say(t);if(after)setTimeout(after,1100)};
+  const tryf=i=>{
+    if(tok!==PT)return;if(i>=exts.length)return fallback();
+    let moved=false;const nx=()=>{if(!moved){moved=true;tryf(i+1)}};
+    A.onerror=nx;A.onended=()=>{if(tok===PT&&after)after()};
+    A.src="audio/"+key+"."+exts[i];A.play().catch(nx);
+  };
+  tryf(0);
+}
 const shuffle=a=>a.map(x=>[Math.random(),x]).sort((p,q)=>p[0]-q[0]).map(p=>p[1]);
 
 function cheer(msg,cb,ms=1400){const c=$("#cheer");c.innerHTML=`<div>🎉</div><b>${msg}</b>`;c.style.display="flex";setTimeout(()=>{c.style.display="none";cb&&cb()},ms)}
@@ -84,7 +95,7 @@ function cheer(msg,cb,ms=1400){const c=$("#cheer");c.innerHTML=`<div>🎉</div><
 function start(){
   $("#ttl").textContent="حديقة الحروف";
   view.innerHTML=`<div class="hero"><div class="zoo">🦁🐘🦒</div><h1>حديقة الحروف</h1><p>افتح أقفاص الحيوانات مع كل حرف!</p><button class="btn go" id="go">ابدأ اللعب</button></div>`;
-  $("#go").onclick=()=>{say(" ");map()};
+  $("#go").onclick=()=>{unlock();say(" ");map()};
 }
 function map(){
   upd();$("#ttl").textContent="اختر حرفك";const c=cur();
@@ -100,7 +111,7 @@ function station(i,k){
   if(k==0){
     view.innerHTML=steps(0)+`<div class="card"><div class="big">${l.c}</div><div class="em">${l.e}</div><div class="wd">${l.w}</div>
     <button class="btn" id="snd">🔊 اسمع</button><button class="btn go" id="nx" disabled>التالي ◀</button></div>`;
-    const p=()=>{play("n"+i,l.n);setTimeout(()=>play("w"+i,l.w),1100);$("#nx").disabled=false};
+    const p=()=>{play("n"+i,l.n,()=>play("w"+i,l.w));$("#nx").disabled=false};
     $("#snd").onclick=p;$("#nx").onclick=()=>next(i,0);setTimeout(p,400);
   }else if(k==1){
     quiz(i,k,[l.c+"\u064E",l.c+"\u064F",l.c+"\u0650"],"أي صوت سمعت؟");
