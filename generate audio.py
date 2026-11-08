@@ -1,5 +1,5 @@
 # يولّد أصوات لعبة الحروف عبر Speko ويحفظها في مجلد audio
-import os, sys, time
+import os, sys, time, wave
 from pathlib import Path
 from spekoai import Speko
 
@@ -40,6 +40,34 @@ def synth(speko, text):
     except TypeError:
         return speko.synthesize(text, language="ar-SA")
 
+
+def sniff(b):
+    if b[:4] == b"RIFF": return "wav"
+    if b[:3] == b"ID3" or (len(b) > 1 and b[0] == 0xFF and (b[1] & 0xE0) == 0xE0): return "mp3"
+    return None
+
+def save(out_dir, key, sp):
+    data = sp.audio
+    kind = sniff(data)
+    if kind is None:  # raw PCM: wrap as 16-bit mono WAV
+        rate = getattr(sp, "sample_rate", None) or 24000
+        p = out_dir / f"{key}.wav"
+        with wave.open(str(p), "wb") as w:
+            w.setnchannels(1); w.setsampwidth(2); w.setframerate(int(rate)); w.writeframes(data)
+        return "wav(pcm)"
+    (out_dir / f"{key}.{kind}").write_bytes(data)
+    return kind
+
+def existing_ok(out_dir, key):
+    for p in out_dir.glob(key + ".*"):
+        kind = sniff(p.read_bytes()[:4] + b"\x00\x00")
+        if kind is None:
+            p.unlink(); continue
+        if p.suffix[1:] != kind:
+            p.rename(p.with_suffix("." + kind))
+        return True
+    return False
+
 def main():
     speko = Speko(api_key=os.environ["SPEKO_API_KEY"])
     out_dir = Path("audio")
@@ -47,17 +75,16 @@ def main():
     made = skipped = failed = 0
     for i in parse(os.environ.get("LETTERS", "0")):
         for key, text in items(i).items():
-            if any(out_dir.glob(key + ".*")):
+            if existing_ok(out_dir, key):
                 skipped += 1
                 continue
             for attempt in range(3):
                 try:
                     sp = synth(speko, text)
                     ct = sp.content_type or ""
-                    ext = "mp3" if "mpeg" in ct else "wav" if "wav" in ct else "mp3"
-                    (out_dir / f"{key}.{ext}").write_bytes(sp.audio)
+                    kind = save(out_dir, key, sp)
                     made += 1
-                    print("OK", key, text, ct)
+                    print("OK", key, text, ct, kind)
                     break
                 except Exception as e:
                     print("retry", key, e)

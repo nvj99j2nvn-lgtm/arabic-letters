@@ -7,48 +7,54 @@
 <meta name="apple-mobile-web-app-title" content="حديقة الحروف">
 <title>حديقة الحروف</title>
 <style>
-:root{--sky:#bfe6f5;--leaf:#2f8f57;--leaf2:#256f45;--sun:#ff8a3d;--brown:#4a2f1b;--sand:#fff1c9;--red:#e5484d;
+:root{--sky:#DDD5E4;--leaf:#74843D;--leaf2:#55622B;--sun:#7F6F89;--sun2:#5E506A;--brown:#38381C;--sand:#EDE6D4;--card:#FAF7EE;--blue:#CBE1EE;--blue2:#A9C7DB;--red:#8C2E3E;
 font-family:"Geeza Pro","Baghdad","Arial",sans-serif}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
 html,body{margin:0;height:100%;background:var(--sky);color:var(--brown);overflow:hidden}
 #app{height:100%;display:flex;flex-direction:column;padding:env(safe-area-inset-top) 18px env(safe-area-inset-bottom);
-background:linear-gradient(var(--sky) 70%,#9fd68a 70%)}
+background:linear-gradient(var(--blue) 0%,var(--sky) 70%,#CBD3A6 70%)}
 header{display:flex;align-items:center;justify-content:space-between;padding:12px 4px;font-size:26px;font-weight:700}
-header button{font-size:30px;background:#fff;border:0;border-radius:50%;width:56px;height:56px}
+header button{font-size:30px;background:var(--card);border:0;border-radius:50%;width:56px;height:56px;box-shadow:0 4px 0 var(--blue2)}
 #view{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:0}
+button{touch-action:manipulation}
 .btn{font:inherit;font-size:28px;font-weight:700;color:#fff;background:var(--leaf);border:0;border-bottom:6px solid var(--leaf2);
 border-radius:22px;padding:14px 34px;margin:8px}
-.btn:active{transform:translateY(4px);border-bottom-width:2px}
+.btn{transition:transform .08s,filter .08s}
+.btn:active,.btn.press{transform:translateY(5px) scale(.96);border-bottom-width:2px;filter:brightness(1.25)}
+.opt.press,.cell.press{transform:scale(.93);filter:brightness(1.1)}
+.btn.playing{animation:pulse .6s infinite alternate;background:#A798AF;border-bottom-color:#85749D}
+@keyframes pulse{to{transform:scale(1.07)}}
 .btn:disabled{opacity:.4}
-.btn.go{background:var(--sun);border-bottom-color:#d96a1f}
+.btn.go{background:var(--sun);border-bottom-color:var(--sun2)}
 .hero{text-align:center}
 .hero h1{font-size:68px;margin:0 0 6px}
 .hero p{font-size:28px;margin:0 0 20px}
 .hero .zoo{font-size:60px;letter-spacing:10px}
 .grid{display:grid;grid-template-columns:repeat(7,1fr);gap:12px;width:100%;max-width:900px;direction:rtl}
-.cell{font:inherit;font-size:46px;font-weight:700;background:#fff;color:var(--brown);border:0;border-bottom:6px solid #d8cfa8;
+.cell{font:inherit;font-size:46px;font-weight:700;background:var(--card);color:var(--brown);border:0;border-bottom:6px solid #D9D0B8;
 border-radius:20px;aspect-ratio:1;position:relative;padding:0}
 .cell small{position:absolute;bottom:2px;left:0;right:0;font-size:18px}
 .cell.ok{background:var(--sand);border-bottom-color:var(--sun)}
 .cell.lock{opacity:.45}
 .steps{display:flex;gap:10px;margin-bottom:10px}
-.steps span{padding:6px 14px;border-radius:30px;background:#ffffffaa;font-size:20px}
+.steps span{padding:6px 14px;border-radius:30px;background:#E4F0F7;font-size:20px}
 .steps span.on{background:var(--sun);color:#fff;font-weight:700}
 .steps span.fin{background:var(--leaf);color:#fff}
-.card{background:#fff;border-radius:30px;padding:18px 30px;text-align:center;box-shadow:0 8px 0 #0002;max-width:760px;width:100%}
+.card{background:var(--card);border-radius:30px;padding:18px 30px;text-align:center;box-shadow:0 8px 0 var(--blue2);max-width:760px;width:100%}
 .big{font-size:150px;line-height:1.1;color:var(--leaf)}
 .em{font-size:90px}.wd{font-size:40px;font-weight:700;margin-bottom:6px}
 .opts{display:flex;gap:16px;justify-content:center;margin:14px 0}
-.opt{font:inherit;font-size:84px;font-weight:700;background:var(--sand);color:var(--brown);border:0;border-bottom:8px solid #e3c878;
+.opt{font:inherit;font-size:84px;font-weight:700;background:var(--sand);color:var(--brown);border:0;border-bottom:8px solid #CFC4A3;
 border-radius:26px;width:190px;height:160px}
-.opt.bad{animation:sh .4s;background:#ffd6d6}
-.opt.good{background:#c8f0cf;border-bottom-color:var(--leaf)}
+.opt.bad{animation:sh .4s;background:#EBCFD3}
+.opt.good{background:#D8E0B5;border-bottom-color:var(--leaf)}
 @keyframes sh{25%{transform:translateX(-14px)}75%{transform:translateX(14px)}}
 .q{font-size:30px;margin:0 0 4px}
-.cv{position:relative;width:min(520px,100%);aspect-ratio:520/380;background:#fff;border-radius:26px;margin:0 auto;box-shadow:0 6px 0 #0002;overflow:hidden}
+.cv{position:relative;width:min(520px,100%);aspect-ratio:520/380;background:var(--card);border-radius:26px;margin:0 auto;box-shadow:0 6px 0 var(--blue2);overflow:hidden}
 .cv canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none}
 .msg{min-height:34px;font-size:24px;font-weight:700;color:var(--red)}
-#cheer{position:fixed;inset:0;display:none;align-items:center;justify-content:center;flex-direction:column;background:#fff9;font-size:90px;z-index:9;text-align:center}
+#dbg{position:fixed;bottom:4px;left:10px;font-size:14px;opacity:.75;z-index:5}
+#cheer{position:fixed;inset:0;display:none;align-items:center;justify-content:center;flex-direction:column;background:#FAF7EEdd;font-size:90px;z-index:9;text-align:center}
 #cheer b{font-size:56px;color:var(--leaf)}
 @media (max-width:700px){.opt{width:100px;height:110px;font-size:52px}.big{font-size:100px}.hero h1{font-size:44px}.cell{font-size:30px}}
 </style>
@@ -59,6 +65,7 @@ border-radius:26px;width:190px;height:160px}
   <div id="view"></div>
 </div>
 <div id="cheer"></div>
+<div id="dbg"></div>
 <script>
 const LET="أبتثجحخدذرزسشصضطظعغفقكلمنهوي";
 const NAMES=["ألف","باء","تاء","ثاء","جيم","حاء","خاء","دال","ذال","راء","زاي","سين","شين","صاد","ضاد","طاء","ظاء","عين","غين","فاء","قاف","كاف","لام","ميم","نون","هاء","واو","ياء"];
@@ -73,17 +80,19 @@ const cur=()=>{const i=done.indexOf(false);return i<0?28:i};
 const upd=()=>{$("#stars").textContent="⭐ "+done.filter(Boolean).length};
 
 /* الصوت: ضع ملفات mp3 في مجلد audio (مثل audio/n0.mp3 للحرف الأول) وتُستخدم تلقائيا، وإلا يُستخدم صوت المتصفح */
-function say(t){try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang="ar-SA";u.rate=.7;speechSynthesis.speak(u)}catch(e){}}
+function busy(on){const b=document.getElementById("snd");if(!b)return;b.classList.toggle("playing",on);b.textContent=on?"🔊 ...":"🔊 اسمع"}
+function say(t){try{speechSynthesis.cancel();setTimeout(()=>{const u=new SpeechSynthesisUtterance(t);u.lang="ar-SA";u.rate=.7;u.onstart=()=>busy(true);u.onend=u.onerror=()=>busy(false);speechSynthesis.speak(u)},80)}catch(e){}}
 const A=new Audio();let PT=0;
-function unlock(){try{A.src="data:audio/wav;base64,UklGRuwAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YcgAAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgA==";A.play().catch(()=>{})}catch(e){}}
+const dbg=m=>{const d=document.getElementById("dbg");if(d)d.textContent=m};
+function unlock(){try{A.onplaying=null;A.src="data:audio/wav;base64,UklGRuwAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YcgAAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgA==";A.play().catch(()=>{})}catch(e){}}
 function play(key,t,after){
   const tok=++PT,exts=["mp3","wav","m4a"];let fb=false;
   try{speechSynthesis.cancel()}catch(e){}
-  const fallback=()=>{if(fb||tok!==PT)return;fb=true;say(t);if(after)setTimeout(after,1100)};
+  const fallback=()=>{if(fb||tok!==PT)return;fb=true;dbg("⚠️ صوت المتصفح الاحتياطي: ملف "+key+" ما اشتغل");say(t);if(after)setTimeout(after,1100)};
   const tryf=i=>{
     if(tok!==PT)return;if(i>=exts.length)return fallback();
     let moved=false;const nx=()=>{if(!moved){moved=true;tryf(i+1)}};
-    A.onerror=nx;A.onended=()=>{if(tok===PT&&after)after()};
+    A.onplaying=()=>{dbg("🔊 صوت الذكاء ✅");busy(true)};A.onerror=nx;A.onended=()=>{busy(false);if(tok===PT&&after)after()};
     A.src="audio/"+key+"."+exts[i];A.play().catch(nx);
   };
   tryf(0);
@@ -140,7 +149,7 @@ function write(i){
   const g=$("#g").getContext("2d");g.font='bold 300px "Geeza Pro","Arial",sans-serif';g.textAlign="center";g.textBaseline="middle";
   g.fillStyle="#d9d3c7";g.fillText(l.c,W/2,H/2+10);
   const mask=g.getImageData(0,0,W,H).data;
-  const cv=$("#d"),d=cv.getContext("2d");d.lineWidth=36;d.lineCap=d.lineJoin="round";d.strokeStyle="#ff8a3d";
+  const cv=$("#d"),d=cv.getContext("2d");d.lineWidth=36;d.lineCap=d.lineJoin="round";d.strokeStyle="#8C7A9C";
   let on=false;
   const pt=e=>{const r=cv.getBoundingClientRect();return[(e.clientX-r.left)*W/r.width,(e.clientY-r.top)*H/r.height]};
   cv.onpointerdown=e=>{on=true;cv.setPointerCapture(e.pointerId);const[x,y]=pt(e);d.beginPath();d.moveTo(x,y);d.lineTo(x+.1,y);d.stroke()};
@@ -154,6 +163,8 @@ function write(i){
   };
 }
 $("#home").onclick=()=>{$("#cheer").style.display="none";map()};
+document.addEventListener("touchstart",()=>{},{passive:true});
+document.addEventListener("pointerdown",e=>{const b=e.target.closest&&e.target.closest(".btn,.opt,.cell");if(b){b.classList.add("press");setTimeout(()=>b.classList.remove("press"),200)}});
 start();
 </script>
 </body>
